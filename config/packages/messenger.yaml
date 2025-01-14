@@ -1,0 +1,34 @@
+framework:
+    messenger:
+        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+        # failure_transport: failed
+
+        transports:
+            order_transport:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    metadata.broker.list: '%env(KAFKA_BROKERS)%'
+                    security.protocol: 'plaintext'
+                    group.id: 'my-group-id'
+                    allow.auto.create.topics: true
+                    message.send.max.retries: 5
+                    producer_topic: 'users'
+                    max.poll.interval.ms: 300000
+                    session.timeout.ms: 30000
+                    request.timeout.ms: 30000
+                    consumer_topics:
+                        - 'users'
+
+        routing:
+            'App\Messenger\Message\OrderPaidMessage': order_transport
+
+        serializer:
+            default_serializer: messenger.transport.symfony_serializer
+
+# when@test:
+#    framework:
+#        messenger:
+#            transports:
+#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
+#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
+#                async: 'in-memory://'

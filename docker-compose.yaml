@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Symfony PHP Application
+  app:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+    container_name: symfony_app
+    volumes:
+      - .:/var/symfony-rabbit
+    depends_on:
+      - rabbitmq
+    environment:
+      - APP_ENV=dev
+      - DATABASE_URL=postgresql://user:password@db:5432/app_db
+    ports:
+      - "8000:80"
+
+  # RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"  # RabbitMQ
+      - "15672:15672"  # Management UI
+
+  # Kafka Services
+  zookeeper:
+    image: zookeeper:latest
+    container_name: zookeeper
+    environment:
+      - ZOO_MAX_BUFFER_SIZE=5242880
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+
+  zoonavigator:
+    image: elkozmon/zoonavigator:1.0.0
+    container_name: zoonavigator
+    environment:
+      ZOOKEEPER_HOSTS: zookeeper:2181
+    ports:
+      - "9000:9000"
+    depends_on:
+      - zookeeper
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
+    ports:
+      - "9092:9092"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    ports:
+      - "8080:8080"
+
+  # Database Service (PostgreSQL Example)
+  db:
+    image: postgres:15
+    container_name: symfony_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
