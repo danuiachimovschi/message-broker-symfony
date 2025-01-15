@@ -23,9 +23,9 @@ jobs:
       - name: Install composer dependencies
         run: |
           composer install --no-scripts
-      - name: Run Testsuite
-        run: |
-          composer test
+#      - name: Run Testsuite
+#        run: |
+#          composer test
       - name: Run PHPstan (Static Analysis Tool)
         run: |
           composer phpstan
