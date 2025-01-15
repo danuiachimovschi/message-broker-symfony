@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c7d13ea6776a602f5b00b7dcd21b3eb",
+    "content-hash": "5dbddf05dd8a979339fb93a0db55efde",
     "packages": [
         {
             "name": "enqueue/rdkafka",
@@ -65,6 +65,56 @@
                 "source": "https://github.com/php-enqueue/enqueue-dev"
             },
             "time": "2023-08-08T20:59:25+00:00"
+        },
+        {
+            "name": "jobcloud/avro-validator",
+            "version": "v2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jobcloud/avro-validator.git",
+                "reference": "4cd42e1f17e374ff979085b8f909cb2bd0ad5f2e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jobcloud/avro-validator/zipball/4cd42e1f17e374ff979085b8f909cb2bd0ad5f2e",
+                "reference": "4cd42e1f17e374ff979085b8f909cb2bd0ad5f2e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^8.0",
+                "symfony/console": "^5.1.5 || ^6.0 || ^7.0"
+            },
+            "require-dev": {
+                "ergebnis/phpstan-rules": "^2.0.0",
+                "friends-of-phpspec/phpspec-code-coverage": "dev-master@dev",
+                "infection/infection": "^0.26 || ^0.29",
+                "infection/phpspec-adapter": "^0.2.1",
+                "phpspec/phpspec": "^7.0",
+                "phpstan/phpstan": "^1.9.0",
+                "phpstan/phpstan-deprecation-rules": "^1.1.0",
+                "phpstan/phpstan-strict-rules": "^1.4.0",
+                "rregeer/phpunit-coverage-check": "^0.3.1",
+                "squizlabs/php_codesniffer": "^3.4.2"
+            },
+            "bin": [
+                "bin/avro-validator"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Jobcloud\\Avro\\Validator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "support": {
+                "issues": "https://github.com/jobcloud/avro-validator/issues",
+                "source": "https://github.com/jobcloud/avro-validator/tree/v2.1.0"
+            },
+            "time": "2024-10-14T08:17:23+00:00"
         },
         {
             "name": "jobcloud/php-kafka-lib",
