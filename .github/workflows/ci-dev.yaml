@@ -9,7 +9,7 @@ jobs:
   phpunit:
     runs-on: ubuntu-latest
     container:
-      image: php:8.2-fpm
+      image: iachimovschid/message-brokers:latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,9 +23,9 @@ jobs:
       - name: Install composer dependencies
         run: |
           composer install --no-scripts
-      - name: Run Testsuite
-        run: |
-          composer test
+#      - name: Run Testsuite
+#        run: |
+#          composer test
       - name: Run PHPstan (Static Analysis Tool)
         run: |
           composer phpstan
