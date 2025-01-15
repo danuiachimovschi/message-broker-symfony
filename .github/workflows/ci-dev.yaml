@@ -9,7 +9,7 @@ jobs:
   phpunit:
     runs-on: ubuntu-latest
     container:
-      image: php:8.2-fpm
+      image: iachimovschid/message-brokers:latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
