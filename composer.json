@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "ext-rdkafka": "*",
         "enqueue/rdkafka": "^0.10.20",
+        "jobcloud/php-kafka-lib": "^2.0",
         "symfony/amqp-messenger": "7.2.*",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
@@ -59,6 +60,9 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "phpstan": [
+            "vendor/bin/phpstan analyse src"
         ]
     },
     "conflict": {
@@ -71,6 +75,10 @@
         }
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.68",
+        "kwn/php-rdkafka-stubs": "^2.2",
+        "php-cs-fixer/shim": "^3.9",
+        "phpstan/phpstan": "^2.1",
         "symfony/maker-bundle": "^1.61"
     }
 }

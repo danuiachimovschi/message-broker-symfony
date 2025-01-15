@@ -27,7 +27,6 @@ class BusCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-
         $io = new SymfonyStyle($input, $output);
 
         $this->messageBus->dispatch(new OrderPaidMessage(rand(1, 100)));

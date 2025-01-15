@@ -10,6 +10,7 @@ framework:
                     metadata.broker.list: '%env(KAFKA_BROKERS)%'
                     security.protocol: 'plaintext'
                     group.id: 'my-group-id'
+                    auto.offset.reset: 'earliest'
                     allow.auto.create.topics: true
                     message.send.max.retries: 5
                     producer_topic: 'users'

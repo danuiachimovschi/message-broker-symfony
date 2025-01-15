@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Kafka\Transport;
 
+use App\Kafka\Exceptions\KafkaConsumerEndOfPartitionException;
+use App\Kafka\Exceptions\KafkaConsumerTimeoutException;
+use RdKafka\Exception;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
-use RdKafka\Exception;
 
 class KafkaReceiver implements ReceiverInterface
 {
     private SerializerInterface $serializer;
     private Connection $connection;
 
-    public function __construct(Connection $connection, SerializerInterface $serializer = null)
+    public function __construct(Connection $connection, ?SerializerInterface $serializer = null)
     {
         $this->connection = $connection;
         $this->serializer = $serializer ?? new PhpSerializer();
@@ -45,9 +47,10 @@ class KafkaReceiver implements ReceiverInterface
 
         if (RD_KAFKA_RESP_ERR_NO_ERROR !== $kafkaMessage->err) {
             switch ($kafkaMessage->err) {
-                case RD_KAFKA_RESP_ERR__PARTITION_EOF: // No more messages
-                case RD_KAFKA_RESP_ERR__TIMED_OUT: // Timeout
-                    return;
+                case RD_KAFKA_RESP_ERR__PARTITION_EOF:
+                    throw new KafkaConsumerEndOfPartitionException($kafkaMessage->errstr(), $kafkaMessage->err);
+                case RD_KAFKA_RESP_ERR__TIMED_OUT:
+                    throw new KafkaConsumerTimeoutException($kafkaMessage->errstr(), $kafkaMessage->err);
                 default:
                     throw new TransportException($kafkaMessage->errstr(), $kafkaMessage->err);
             }
