@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "ext-rdkafka": "*",
         "enqueue/rdkafka": "^0.10.20",
+        "jobcloud/avro-validator": "^2.1",
         "jobcloud/php-kafka-lib": "^2.0",
         "symfony/amqp-messenger": "7.2.*",
         "symfony/console": "7.2.*",
