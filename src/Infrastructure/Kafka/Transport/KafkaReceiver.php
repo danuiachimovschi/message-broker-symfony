@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Kafka\Transport;
+namespace App\Infrastructure\Kafka\Transport;
 
-use App\Kafka\Exceptions\KafkaConsumerEndOfPartitionException;
-use App\Kafka\Exceptions\KafkaConsumerTimeoutException;
+use App\Infrastructure\Kafka\Exceptions\KafkaConsumerEndOfPartitionException;
+use App\Infrastructure\Kafka\Exceptions\KafkaConsumerTimeoutException;
 use RdKafka\Exception;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Command;
+declare(strict_types=1);
+
+namespace App\Infrastructure\Command;
 
 use Jobcloud\Kafka\Consumer\KafkaConsumerBuilder;
 use Jobcloud\Kafka\Exception\KafkaConsumerConsumeException;

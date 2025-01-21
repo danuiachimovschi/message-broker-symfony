@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Kafka\Exceptions;
+namespace App\Infrastructure\Kafka\Exceptions;
 
 use RdKafka\Exception;
 

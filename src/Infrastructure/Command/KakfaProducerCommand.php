@@ -1,9 +1,14 @@
 <?php
 
-namespace App\Command;
+declare(strict_types=1);
 
+namespace App\Infrastructure\Command;
+
+use Exception;
 use Jobcloud\Kafka\Message\KafkaProducerMessage;
 use Jobcloud\Kafka\Producer\KafkaProducerBuilder;
+use Prometheus\CollectorRegistry;
+use Prometheus\Storage\Redis;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,18 +30,32 @@ class KakfaProducerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $registry = new CollectorRegistry(new Redis());
+
+        $requestCounter = $registry->getOrRegisterCounter(
+            'kafka',
+            'producer_messages_total',
+            'Total number of messages produced'
+        );
+
         $producer = KafkaProducerBuilder::create()
             ->withAdditionalBroker('kafka:9092')
             ->build();
 
-        $message = KafkaProducerMessage::create('authors', 0)
-            ->withKey('asdf-asdf-asfd-asdf')
-            ->withBody('some test message payload')
-            ->withHeaders([ 'key' => 'value' ]);
+        try {
+            $message = KafkaProducerMessage::create('authors', 0)
+                ->withKey('asdf-asdf-asfd-asdf')
+                ->withBody('some test message payload')
+                ->withHeaders([ 'key' => 'value' ]);
 
-        $producer->produce($message);
+            $producer->produce($message);
+        } catch (Exception $e) {
+            $io->error($e->getMessage());
+            return Command::FAILURE;
+        }
 
         $producer->flush(20000);
+        $requestCounter->incBy(1);
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
