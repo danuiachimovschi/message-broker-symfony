@@ -8,7 +8,7 @@ services:
       - .:/var/symfony-rabbit
       - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "8080:80"
+      - "8082:80"
     depends_on:
       - app
   app:
@@ -109,7 +109,7 @@ services:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
     ports:
-      - "8082:8082"
+      - "8080:8080"
 
   db:
     image: postgres:15

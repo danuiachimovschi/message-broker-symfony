@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Messenger\Handlers;
+namespace App\Infrastructure\Queue\Messenger\Handlers;
 
-use App\Messenger\Message\OrderPaidMessage;
+use App\Infrastructure\Queue\Messenger\Message\OrderPaidMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]

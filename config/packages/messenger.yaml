@@ -21,7 +21,7 @@ framework:
                         - 'users'
 
         routing:
-            'App\Messenger\Message\OrderPaidMessage': order_transport
+            'App\Infrastructure\Queue\Messenger\Message\OrderPaidMessage': order_transport
 
         serializer:
             default_serializer: messenger.transport.symfony_serializer

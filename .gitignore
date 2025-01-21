@@ -19,4 +19,5 @@
 ###> php-cs-fixer/shim ###
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
+dump.rdb
 ###< php-cs-fixer/shim ###

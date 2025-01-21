@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Kafka\Transport;
+namespace App\Infrastructure\Kafka\Transport;
 
 use RdKafka\Conf;
 use RdKafka\KafkaConsumer;
