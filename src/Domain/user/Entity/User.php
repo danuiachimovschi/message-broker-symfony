@@ -35,19 +35,6 @@ class User
         $this->id = Uuid::v4();
     }
 
-    #[ORM\PrePersist]
-    public function onPrePersist(): void
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    #[ORM\PreUpdate]
-    public function onPreUpdate(): void
-    {
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
     public function getId(): Uuid
     {
         return $this->id;
@@ -68,6 +55,16 @@ class User
         return $this->email;
     }
 
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): \DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
     public function setName(string $name): void
     {
         $this->name = $name;
@@ -83,13 +80,16 @@ class User
         $this->email = $email;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): void
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): void
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
     {
-        $this->updatedAt = $updatedAt;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }
