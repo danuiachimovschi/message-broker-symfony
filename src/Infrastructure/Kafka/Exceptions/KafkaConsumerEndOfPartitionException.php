@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Kafka\Exceptions;
+namespace App\Infrastructure\Kafka\Exceptions;
 
 use RdKafka\Exception;
 
