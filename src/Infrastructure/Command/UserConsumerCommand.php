@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Command;
 
+use League\Csv\Reader;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -19,6 +20,15 @@ class UserConsumerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        $csv = Reader::createFromPath(__DIR__ . '/../../../fixtures/users.csv', 'r');
+        $csv->setHeaderOffset(0);
+
+        $records = $csv->getRecords();
+
+        foreach ($records as $record) {
+            var_dump($record["Name"]);
+        }
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
