@@ -8,6 +8,10 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-rdkafka": "*",
+        "doctrine/doctrine-bundle": "^2.13",
+        "doctrine/doctrine-migrations-bundle": "^3.4",
+        "doctrine/migrations": "*",
+        "doctrine/orm": "^3.3",
         "enqueue/rdkafka": "^0.10.20",
         "flix-tech/avro-serde-php": "^2.2",
         "jobcloud/avro-validator": "^2.1",
@@ -24,6 +28,7 @@
         "symfony/property-access": "7.2.*",
         "symfony/runtime": "7.2.*",
         "symfony/serializer": "7.2.*",
+        "symfony/uid": "7.2.*",
         "symfony/yaml": "7.2.*"
     },
     "config": {
