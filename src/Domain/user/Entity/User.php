@@ -6,8 +6,10 @@ namespace App\Domain\user\Entity;
 
 use Symfony\Component\Uid\Uuid;
 use Doctrine\ORM\Mapping as ORM;
+use DateTime;
 
 #[ORM\Entity]
+#[ORM\Table(name: 'users')]
 #[ORM\HasLifecycleCallbacks]
 class User
 {
@@ -16,23 +18,25 @@ class User
     private Uuid $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $name;
+    private string $name;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $surname;
+    private string $surname;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
-    private $email;
+    private string $email;
 
     #[ORM\Column(type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private $createdAt;
+    private DateTime $createdAt;
 
     #[ORM\Column(type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private $updatedAt;
+    private DateTime $updatedAt;
 
     public function __construct()
     {
         $this->id = Uuid::v4();
+        $this->createdAt = new DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     public function getId(): Uuid
@@ -45,29 +49,14 @@ class User
         return $this->name;
     }
 
-    public function getSurname(): string
-    {
-        return $this->surname;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function getCreatedAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function getUpdatedAt(): \DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function getSurname(): string
+    {
+        return $this->surname;
     }
 
     public function setSurname(string $surname): void
@@ -75,21 +64,36 @@ class User
         $this->surname = $surname;
     }
 
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
     public function setEmail(string $email): void
     {
         $this->email = $email;
     }
 
+    public function getCreatedAt(): DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): DateTime
+    {
+        return $this->updatedAt;
+    }
+
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedAt = new DateTime();
     }
 }

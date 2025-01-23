@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\Command;
 
+use Exception;
+use Jobcloud\Kafka\Message\KafkaProducerMessage;
+use Jobcloud\Kafka\Producer\KafkaProducerBuilder;
+use League\Csv\Reader;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -20,7 +24,30 @@ class UserProducerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $producer = KafkaProducerBuilder::create()
+            ->withAdditionalBroker('kafka:9092')
+            ->build();
+
+        $csv = Reader::createFromPath(__DIR__ . '/../../../fixtures/users.csv', 'r');
+        $csv->setHeaderOffset(0);
+
+        $records = $csv->getRecords();
+
+        foreach ($records as $record) {
+            try {
+                $message = KafkaProducerMessage::create('users', 0)
+                    ->withBody(json_encode($record, 1));
+
+                $producer->produce($message);
+                $producer->flush(20000);
+
+                $io->success('Message produced: '. $record['Name']);
+            } catch (Exception $e) {
+                $io->error($e->getMessage());
+
+                return Command::FAILURE;
+            }
+        }
 
         return Command::SUCCESS;
     }
