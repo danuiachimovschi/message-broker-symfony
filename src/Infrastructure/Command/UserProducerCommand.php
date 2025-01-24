@@ -20,6 +20,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserProducerCommand extends Command
 {
+    const TOTAL_PARTITIONS = 5;
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -35,7 +37,7 @@ class UserProducerCommand extends Command
 
         foreach ($records as $record) {
             try {
-                $message = KafkaProducerMessage::create('users', 0)
+                $message = KafkaProducerMessage::create('users', rand(0, self::TOTAL_PARTITIONS - 1))
                     ->withBody(json_encode($record, 1));
 
                 $producer->produce($message);

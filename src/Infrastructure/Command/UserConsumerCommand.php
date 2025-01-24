@@ -12,6 +12,7 @@ use Jobcloud\Kafka\Exception\KafkaConsumerEndOfPartitionException;
 use Jobcloud\Kafka\Exception\KafkaConsumerTimeoutException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -23,10 +24,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class UserConsumerCommand extends Command
 {
     private EntityManagerInterface $entityManager;
+
     public function __construct(EntityManagerInterface $entityManager, string $name = null)
     {
         $this->entityManager = $entityManager;
         parent::__construct($name);
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('partition_id', InputArgument::REQUIRED, 'Partition ID');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -60,8 +67,8 @@ class UserConsumerCommand extends Command
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
                 $consumer->commit($message);
-            } catch (KafkaConsumerTimeoutException|KafkaConsumerEndOfPartitionException $e) {
-            } catch (KafkaConsumerConsumeException $e) {
+            } catch (KafkaConsumerTimeoutException|KafkaConsumerEndOfPartitionException) {
+            } catch (KafkaConsumerConsumeException) {
                 return Command::FAILURE;
             }
         }
