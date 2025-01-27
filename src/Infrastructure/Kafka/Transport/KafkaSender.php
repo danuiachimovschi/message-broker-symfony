@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Kafka\Transport;
 
-use RdKafka\Exception;
+use Exception;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Transport\Sender\SenderInterface;

@@ -37,7 +37,7 @@ class Connection
         private readonly string $transportName,
         private readonly KafkaFactory $kafkaFactory = new KafkaFactory(),
     ) {
-        if (!\extension_loaded('rdkafka')) {
+        if (!extension_loaded('rdkafka')) {
             throw new LogicException(sprintf('You cannot use the "%s" as the "rdkafka" extension is not installed.', __CLASS__));
         }
     }
@@ -67,6 +67,21 @@ class Connection
         return new self($options, $options[self::TRANSPORT_NAME], $kafkaFactory ?? new KafkaFactory());
     }
 
+    public function commit(Message $message): void
+    {
+        if (!array_key_exists(self::GROUP_ID, $this->kafkaConfig)) {
+            throw new LogicException(sprintf('The transport "%s" is not configured to commit messages because "%s" option is missing.', $this->transportName, self::GROUP_ID));
+        }
+
+        $consumer = $this->kafkaFactory->createConsumer($this->kafkaConfig);
+
+        try {
+            $consumer->commit($message);
+        } catch (\RdKafka\Exception $e) {
+            throw new TransportException('Failed to commit message offset: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
     public function get(): Message
     {
         if (!array_key_exists(self::GROUP_ID, $this->kafkaConfig)) {
@@ -90,7 +105,7 @@ class Connection
 
         $topic = $producer->newTopic($this->getTopic());
         $topic->producev(
-            partition: $this->getPartitionId(), // todo: retrieve from stamp ?
+            partition: $this->getPartitionId(),
             msgflags: $this->getMessageFlags(),
             payload: $body,
             headers: $headers

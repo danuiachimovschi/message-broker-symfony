@@ -17,7 +17,6 @@ class KafkaFactory
         foreach ($kafkaConfig as $key => $value) {
             if (array_key_exists($key, array_merge(KafkaOption::global(), KafkaOption::consumer()))) {
                 if (!is_string($value)) {
-                    // todo: warning
                     continue;
                 }
                 $conf->set($key, $value);
@@ -33,11 +32,7 @@ class KafkaFactory
 
         foreach ($kafkaConfig as $key => $value) {
             if (array_key_exists($key, array_merge(KafkaOption::global(), KafkaOption::producer()))) {
-                if (!is_string($value)) {
-                    // todo: warning
-                    continue;
-                }
-                $conf->set($key, $value);
+                $conf->set($key, (string) $value);
             }
         }
 

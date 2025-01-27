@@ -6,7 +6,7 @@ namespace App\Infrastructure\Kafka\Transport;
 
 use App\Infrastructure\Kafka\Exceptions\KafkaConsumerEndOfPartitionException;
 use App\Infrastructure\Kafka\Exceptions\KafkaConsumerTimeoutException;
-use RdKafka\Exception;
+use Exception;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;

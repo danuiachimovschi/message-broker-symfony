@@ -131,6 +131,16 @@ services:
     ports:
       - "9090:9090"
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9001:9001"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -159,11 +169,9 @@ services:
       - database_data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
 
 volumes:
+  clickhouse-data:
   db_data:
   grafana-data:
-###> doctrine/doctrine-bundle ###
   database_data:
-###< doctrine/doctrine-bundle ###
