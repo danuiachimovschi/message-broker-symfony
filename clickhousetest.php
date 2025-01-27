@@ -11,7 +11,7 @@ $config = [
 ];
 $db = new ClickHouseDB\Client($config);
 $db->database('default');
-$db->setTimeout(1.5);      // 1 second , support only Int value
-$db->setTimeout(10);       // 10 seconds
-$db->setConnectTimeOut(5); // 5 seconds
-$db->ping(true); // if can`t connect throw exception
+$db->setTimeout(1.5);
+$db->setTimeout(10);
+$db->setConnectTimeOut(5);
+$db->ping(true);
