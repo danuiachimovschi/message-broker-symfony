@@ -5,20 +5,15 @@ declare(strict_types=1);
 namespace App\Infrastructure\Command;
 
 use App\Domain\user\Entity\User;
+use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
 use AvroSchema;
 use Doctrine\ORM\EntityManagerInterface;
-use FlixTech\AvroSerializer\Objects\RecordSerializer;
-use FlixTech\SchemaRegistryApi\Registry\Cache\AvroObjectCacheAdapter;
-use FlixTech\SchemaRegistryApi\Registry\CachedRegistry;
-use FlixTech\SchemaRegistryApi\Registry\PromisingRegistry;
-use GuzzleHttp\Client;
 use Jobcloud\Kafka\Consumer\KafkaConsumerBuilder;
 use Jobcloud\Kafka\Exception\KafkaConsumerConsumeException;
 use Jobcloud\Kafka\Exception\KafkaConsumerEndOfPartitionException;
 use Jobcloud\Kafka\Exception\KafkaConsumerTimeoutException;
 use Jobcloud\Kafka\Message\Decoder\AvroDecoder;
-use Jobcloud\Kafka\Message\Encoder\AvroEncoder;
-use Jobcloud\Kafka\Message\Registry\AvroSchemaRegistry;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,10 +27,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserConsumerCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager, string $name = null)
-    {
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        protected readonly SchemaRegistryClientInterface $schemaRegistryClient,
+        string $name = null
+    ) {
         $this->entityManager = $entityManager;
         parent::__construct($name);
     }
@@ -48,23 +44,6 @@ class UserConsumerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $schemaRegistryClient = new CachedRegistry(
-            new PromisingRegistry(
-                new Client(['base_uri' => 'schema-registry:8081'])
-            ),
-            new AvroObjectCacheAdapter()
-        );
-
-        $registry = new AvroSchemaRegistry($schemaRegistryClient);
-
-        $recordSerializer = new RecordSerializer(
-            $schemaRegistryClient,
-            [
-                RecordSerializer::OPTION_REGISTER_MISSING_SCHEMAS => false,
-                RecordSerializer::OPTION_REGISTER_MISSING_SUBJECTS => true,
-            ]
-        );
 
         $schema = <<<'JSON'
         {
@@ -80,15 +59,13 @@ class UserConsumerCommand extends Command
 
         $avroSchema = AvroSchema::parse($schema);
 
-        $decoder = new AvroDecoder($registry, $recordSerializer);
-
         $consumer = KafkaConsumerBuilder::create()
             ->withAdditionalConfig(
                 [
                     'enable.auto.commit' => false,
                 ]
             )
-            ->withDecoder($decoder)
+            ->withDecoder($this->schemaRegistryClient->getDecoder())
             ->withAdditionalBroker('kafka:9092')
             ->withConsumerGroup('testGroup')
             ->withAdditionalSubscription('users')
@@ -100,7 +77,7 @@ class UserConsumerCommand extends Command
             try {
                 $message = $consumer->consume();
 
-                $userData =  $recordSerializer->decodeMessage($message->getBody(), $avroSchema);
+                $userData = $this->schemaRegistryClient->getRecordSerializer()->decodeMessage($message->getBody(), $avroSchema);
 
                 $io->success('Message received: '. $userData['name']);
 

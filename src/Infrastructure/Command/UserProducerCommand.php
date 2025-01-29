@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Command;
 
+use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
 use AvroSchema;
 use Exception;
 use FlixTech\AvroSerializer\Objects\RecordSerializer;
@@ -29,26 +30,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserProducerCommand extends Command
 {
+    public function __construct(
+        protected readonly SchemaRegistryClientInterface $schemaRegistryClient,
+        string $name = null
+    ) {
+        parent::__construct($name);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $schemaRegistryClient = new CachedRegistry(
-            new PromisingRegistry(
-                new Client(['base_uri' => 'schema-registry:8081'])
-            ),
-            new AvroObjectCacheAdapter()
-        );
-
-        $registry = new AvroSchemaRegistry($schemaRegistryClient);
-
-        $recordSerializer = new RecordSerializer(
-            $schemaRegistryClient,
-            [
-                RecordSerializer::OPTION_REGISTER_MISSING_SCHEMAS => false,
-                RecordSerializer::OPTION_REGISTER_MISSING_SUBJECTS => true,
-            ]
-        );
 
         // Define Avro Schema
         $schema = <<<'JSON'
@@ -65,8 +56,6 @@ class UserProducerCommand extends Command
 
         $avroSchema = AvroSchema::parse($schema);
 
-        $encoder = new AvroEncoder($registry, $recordSerializer);
-
         $producer = KafkaProducerBuilder::create()
             ->withAdditionalConfig(
                 [
@@ -74,7 +63,7 @@ class UserProducerCommand extends Command
                     'auto.commit.interval.ms' => 500
                 ]
             )
-            ->withEncoder($encoder)
+            ->withEncoder($this->schemaRegistryClient->getEncoder())
             ->withAdditionalBroker('kafka:9092')
             ->build();
 
@@ -85,7 +74,7 @@ class UserProducerCommand extends Command
 
         foreach ($records as $record) {
             try {
-                $avroData = $recordSerializer->encodeRecord('User', $avroSchema, [
+                $avroData = $this->schemaRegistryClient->getRecordSerializer()->encodeRecord('User', $avroSchema, [
                     'name' => $record['Name'],
                     'surname' => $record['Surname'],
                     'email' => $record['Email']

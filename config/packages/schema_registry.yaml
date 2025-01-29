@@ -1,0 +1,4 @@
+parameters:
+    schema_registry.url: '%env(SCHEMA_REGISTRY_URL)%'
+    schema_registry.register_missing_schemas: 0
+    schema_registry.register_missing_subjects: 1
