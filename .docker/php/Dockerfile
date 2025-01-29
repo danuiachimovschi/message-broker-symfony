@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libonig-dev \
     librabbitmq-dev \
+    librdkafka-dev \
     redis \
     && docker-php-ext-install pdo pdo_pgsql zip mbstring \
     && pecl install amqp \
@@ -23,17 +24,21 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install ext-rdkafka PHP
-RUN apt-get update && apt-get install -y \
-    librdkafka-dev \
-    && pecl install rdkafka \
-    && docker-php-ext-enable rdkafka \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN pecl install rdkafka \
+    && docker-php-ext-enable rdkafka
 
 # Install Redis Server and PHP Redis extension
-RUN apt-get update && apt-get install -y redis \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
+# Install Swoole dependencies
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    && pecl install swoole-5.0.3 \
+    && docker-php-ext-enable swoole \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
