@@ -16,6 +16,9 @@ use Jobcloud\Kafka\Consumer\KafkaConsumerBuilder;
 use Jobcloud\Kafka\Exception\KafkaConsumerConsumeException;
 use Jobcloud\Kafka\Exception\KafkaConsumerEndOfPartitionException;
 use Jobcloud\Kafka\Exception\KafkaConsumerTimeoutException;
+use Jobcloud\Kafka\Message\Decoder\AvroDecoder;
+use Jobcloud\Kafka\Message\Encoder\AvroEncoder;
+use Jobcloud\Kafka\Message\Registry\AvroSchemaRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -46,13 +49,14 @@ class UserConsumerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-
         $schemaRegistryClient = new CachedRegistry(
             new PromisingRegistry(
                 new Client(['base_uri' => 'schema-registry:8081'])
             ),
             new AvroObjectCacheAdapter()
         );
+
+        $registry = new AvroSchemaRegistry($schemaRegistryClient);
 
         $recordSerializer = new RecordSerializer(
             $schemaRegistryClient,
@@ -61,19 +65,6 @@ class UserConsumerCommand extends Command
                 RecordSerializer::OPTION_REGISTER_MISSING_SUBJECTS => true,
             ]
         );
-
-        $consumer = KafkaConsumerBuilder::create()
-            ->withAdditionalConfig(
-                [
-                    'enable.auto.commit' => false
-                ]
-            )
-            ->withAdditionalBroker('kafka:9092')
-            ->withConsumerGroup('testGroup')
-            ->withAdditionalSubscription('users')
-            ->build();
-
-        $consumer->subscribe();
 
         $schema = <<<'JSON'
         {
@@ -88,6 +79,22 @@ class UserConsumerCommand extends Command
         JSON;
 
         $avroSchema = AvroSchema::parse($schema);
+
+        $decoder = new AvroDecoder($registry, $recordSerializer);
+
+        $consumer = KafkaConsumerBuilder::create()
+            ->withAdditionalConfig(
+                [
+                    'enable.auto.commit' => false,
+                ]
+            )
+            ->withDecoder($decoder)
+            ->withAdditionalBroker('kafka:9092')
+            ->withConsumerGroup('testGroup')
+            ->withAdditionalSubscription('users')
+            ->build();
+
+        $consumer->subscribe();
 
         while (true) {
             try {

@@ -11,7 +11,10 @@ use FlixTech\SchemaRegistryApi\Registry\Cache\AvroObjectCacheAdapter;
 use FlixTech\SchemaRegistryApi\Registry\CachedRegistry;
 use FlixTech\SchemaRegistryApi\Registry\PromisingRegistry;
 use GuzzleHttp\Client;
+use Jobcloud\Kafka\Message\Decoder\AvroDecoder;
+use Jobcloud\Kafka\Message\Encoder\AvroEncoder;
 use Jobcloud\Kafka\Message\KafkaProducerMessage;
+use Jobcloud\Kafka\Message\Registry\AvroSchemaRegistry;
 use Jobcloud\Kafka\Producer\KafkaProducerBuilder;
 use League\Csv\Reader;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -37,6 +40,8 @@ class UserProducerCommand extends Command
             new AvroObjectCacheAdapter()
         );
 
+        $registry = new AvroSchemaRegistry($schemaRegistryClient);
+
         $recordSerializer = new RecordSerializer(
             $schemaRegistryClient,
             [
@@ -60,7 +65,16 @@ class UserProducerCommand extends Command
 
         $avroSchema = AvroSchema::parse($schema);
 
+        $encoder = new AvroEncoder($registry, $recordSerializer);
+
         $producer = KafkaProducerBuilder::create()
+            ->withAdditionalConfig(
+                [
+                    'compression.codec' => 'lz4',
+                    'auto.commit.interval.ms' => 500
+                ]
+            )
+            ->withEncoder($encoder)
             ->withAdditionalBroker('kafka:9092')
             ->build();
 
