@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Command;
 
+use AvroSchema;
 use Exception;
+use FlixTech\AvroSerializer\Objects\RecordSerializer;
+use FlixTech\SchemaRegistryApi\Registry\Cache\AvroObjectCacheAdapter;
+use FlixTech\SchemaRegistryApi\Registry\CachedRegistry;
+use FlixTech\SchemaRegistryApi\Registry\PromisingRegistry;
+use GuzzleHttp\Client;
 use Jobcloud\Kafka\Message\KafkaProducerMessage;
 use Jobcloud\Kafka\Producer\KafkaProducerBuilder;
 use League\Csv\Reader;
@@ -24,6 +30,36 @@ class UserProducerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $schemaRegistryClient = new CachedRegistry(
+            new PromisingRegistry(
+                new Client(['base_uri' => 'schema-registry:8081'])
+            ),
+            new AvroObjectCacheAdapter()
+        );
+
+        $recordSerializer = new RecordSerializer(
+            $schemaRegistryClient,
+            [
+                RecordSerializer::OPTION_REGISTER_MISSING_SCHEMAS => false,
+                RecordSerializer::OPTION_REGISTER_MISSING_SUBJECTS => true,
+            ]
+        );
+
+        // Define Avro Schema
+        $schema = <<<'JSON'
+        {
+            "type": "record",
+            "name": "User",
+            "fields": [
+                {"name": "name", "type": "string"},
+                {"name": "surname", "type": "string"},
+                {"name": "email", "type": "string"}
+            ]
+        }
+        JSON;
+
+        $avroSchema = AvroSchema::parse($schema);
+
         $producer = KafkaProducerBuilder::create()
             ->withAdditionalBroker('kafka:9092')
             ->build();
@@ -35,8 +71,14 @@ class UserProducerCommand extends Command
 
         foreach ($records as $record) {
             try {
+                $avroData = $recordSerializer->encodeRecord('User', $avroSchema, [
+                    'name' => $record['Name'],
+                    'surname' => $record['Surname'],
+                    'email' => $record['Email']
+                ]);
+
                 $message = KafkaProducerMessage::create('users', RD_KAFKA_PARTITION_UA)
-                    ->withBody(json_encode($record, JSON_HEX_TAG));
+                    ->withBody($avroData);
 
                 $producer->produce($message);
                 $producer->flush(20000);
