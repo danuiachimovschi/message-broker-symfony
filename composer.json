@@ -8,6 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-rdkafka": "*",
+        "ext-swoole": "*",
         "doctrine/doctrine-bundle": "^2.13",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/migrations": "*",
@@ -93,6 +94,7 @@
         "kwn/php-rdkafka-stubs": "^2.2",
         "php-cs-fixer/shim": "^3.9",
         "phpstan/phpstan": "^2.1",
+        "swoole/ide-helper": "^6.0",
         "symfony/maker-bundle": "^1.61"
     }
 }

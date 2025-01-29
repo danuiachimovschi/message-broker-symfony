@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2522b30403038bc1dbe95fbe1f193cb5",
+    "content-hash": "e685cf58d32c9b8eaf63f2c5d8212f3d",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -7331,6 +7331,38 @@
                 }
             ],
             "time": "2024-07-03T04:53:05+00:00"
+        },
+        {
+            "name": "swoole/ide-helper",
+            "version": "6.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swoole/ide-helper.git",
+                "reference": "86a61562a1f1634339ee52f3b8988591f51a2799"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/86a61562a1f1634339ee52f3b8988591f51a2799",
+                "reference": "86a61562a1f1634339ee52f3b8988591f51a2799",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Team Swoole",
+                    "email": "team@swoole.com"
+                }
+            ],
+            "description": "IDE help files for Swoole.",
+            "support": {
+                "issues": "https://github.com/swoole/ide-helper/issues",
+                "source": "https://github.com/swoole/ide-helper/tree/6.0.0"
+            },
+            "time": "2025-01-03T19:08:24+00:00"
         },
         {
             "name": "symfony/maker-bundle",
