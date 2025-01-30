@@ -12,8 +12,6 @@ use Jobcloud\Kafka\Consumer\KafkaConsumerBuilder;
 use Jobcloud\Kafka\Exception\KafkaConsumerConsumeException;
 use Jobcloud\Kafka\Exception\KafkaConsumerEndOfPartitionException;
 use Jobcloud\Kafka\Exception\KafkaConsumerTimeoutException;
-use Jobcloud\Kafka\Message\Decoder\AvroDecoder;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,7 +30,6 @@ class UserConsumerCommand extends Command
         protected readonly SchemaRegistryClientInterface $schemaRegistryClient,
         string $name = null
     ) {
-        $this->entityManager = $entityManager;
         parent::__construct($name);
     }
 
@@ -44,20 +41,6 @@ class UserConsumerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $schema = <<<'JSON'
-        {
-            "type": "record",
-            "name": "User",
-            "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "surname", "type": "string"},
-                {"name": "email", "type": "string"}
-            ]
-        }
-        JSON;
-
-        $avroSchema = AvroSchema::parse($schema);
 
         $consumer = KafkaConsumerBuilder::create()
             ->withAdditionalConfig(
@@ -77,7 +60,7 @@ class UserConsumerCommand extends Command
             try {
                 $message = $consumer->consume();
 
-                $userData = $this->schemaRegistryClient->getRecordSerializer()->decodeMessage($message->getBody(), $avroSchema);
+                $userData = $this->schemaRegistryClient->getRecordSerializer()->decodeMessage($message->getBody());
 
                 $io->success('Message received: '. $userData['name']);
 

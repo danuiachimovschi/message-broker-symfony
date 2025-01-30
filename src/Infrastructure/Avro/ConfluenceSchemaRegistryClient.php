@@ -6,6 +6,7 @@ namespace App\Infrastructure\Avro;
 
 use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
 use FlixTech\AvroSerializer\Objects\RecordSerializer;
+use FlixTech\SchemaRegistryApi\AsynchronousRegistry;
 use FlixTech\SchemaRegistryApi\Registry;
 use FlixTech\SchemaRegistryApi\Registry\Cache\AvroObjectCacheAdapter;
 use FlixTech\SchemaRegistryApi\Registry\CachedRegistry;
@@ -26,11 +27,14 @@ class ConfluenceSchemaRegistryClient implements SchemaRegistryClientInterface
 
     private readonly RecordSerializer $recordSerializer;
 
+    private readonly array $schemaClientConfig;
+
     public function __construct(SchemaRegistryService $schemaRegistryService)
     {
+        $this->schemaClientConfig = ['base_uri' => $schemaRegistryService->getUrl()];
         $this->cachedRegistry = new CachedRegistry(
             new PromisingRegistry(
-                new Client(['base_uri' => $schemaRegistryService->getUrl()])
+                new Client($this->schemaClientConfig)
             ),
             new AvroObjectCacheAdapter()
         );
@@ -68,5 +72,12 @@ class ConfluenceSchemaRegistryClient implements SchemaRegistryClientInterface
     public function getDecoder(): AvroDecoderInterface
     {
         return new AvroDecoder($this->schemaRegistryClient, $this->recordSerializer);
+    }
+
+    public function initPromisingRegistry(): AsynchronousRegistry
+    {
+        return new PromisingRegistry(
+            new Client($this->schemaClientConfig)
+        );
     }
 }

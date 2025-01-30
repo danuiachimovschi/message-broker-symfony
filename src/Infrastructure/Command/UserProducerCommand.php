@@ -7,15 +7,7 @@ namespace App\Infrastructure\Command;
 use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
 use AvroSchema;
 use Exception;
-use FlixTech\AvroSerializer\Objects\RecordSerializer;
-use FlixTech\SchemaRegistryApi\Registry\Cache\AvroObjectCacheAdapter;
-use FlixTech\SchemaRegistryApi\Registry\CachedRegistry;
-use FlixTech\SchemaRegistryApi\Registry\PromisingRegistry;
-use GuzzleHttp\Client;
-use Jobcloud\Kafka\Message\Decoder\AvroDecoder;
-use Jobcloud\Kafka\Message\Encoder\AvroEncoder;
 use Jobcloud\Kafka\Message\KafkaProducerMessage;
-use Jobcloud\Kafka\Message\Registry\AvroSchemaRegistry;
 use Jobcloud\Kafka\Producer\KafkaProducerBuilder;
 use League\Csv\Reader;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -41,20 +33,7 @@ class UserProducerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        // Define Avro Schema
-        $schema = <<<'JSON'
-        {
-            "type": "record",
-            "name": "User",
-            "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "surname", "type": "string"},
-                {"name": "email", "type": "string"}
-            ]
-        }
-        JSON;
-
-        $avroSchema = AvroSchema::parse($schema);
+        $avroSchema = $this->schemaRegistryClient->getRegistry()->latestVersion('User')->wait();
 
         $producer = KafkaProducerBuilder::create()
             ->withAdditionalConfig(
