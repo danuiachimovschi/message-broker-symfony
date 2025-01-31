@@ -4,17 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Command;
 
-use AvroSchema;
+use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
 use Exception;
-use FlixTech\AvroSerializer\Objects\RecordSerializer;
-use FlixTech\SchemaRegistryApi\Registry\Cache\AvroObjectCacheAdapter;
-use FlixTech\SchemaRegistryApi\Registry\CachedRegistry;
-use FlixTech\SchemaRegistryApi\Registry\PromisingRegistry;
-use GuzzleHttp\Client;
-use Jobcloud\Kafka\Message\Decoder\AvroDecoder;
-use Jobcloud\Kafka\Message\Encoder\AvroEncoder;
 use Jobcloud\Kafka\Message\KafkaProducerMessage;
-use Jobcloud\Kafka\Message\Registry\AvroSchemaRegistry;
 use Jobcloud\Kafka\Producer\KafkaProducerBuilder;
 use League\Csv\Reader;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -29,43 +21,22 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserProducerCommand extends Command
 {
+    const SCHEMA_NAME = 'User';
+
+    const TOPIC_NAME = 'users';
+
+    public function __construct(
+        protected readonly SchemaRegistryClientInterface $schemaRegistryClient,
+        string $name = null
+    ) {
+        parent::__construct($name);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $schemaRegistryClient = new CachedRegistry(
-            new PromisingRegistry(
-                new Client(['base_uri' => 'schema-registry:8081'])
-            ),
-            new AvroObjectCacheAdapter()
-        );
-
-        $registry = new AvroSchemaRegistry($schemaRegistryClient);
-
-        $recordSerializer = new RecordSerializer(
-            $schemaRegistryClient,
-            [
-                RecordSerializer::OPTION_REGISTER_MISSING_SCHEMAS => false,
-                RecordSerializer::OPTION_REGISTER_MISSING_SUBJECTS => true,
-            ]
-        );
-
-        // Define Avro Schema
-        $schema = <<<'JSON'
-        {
-            "type": "record",
-            "name": "User",
-            "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "surname", "type": "string"},
-                {"name": "email", "type": "string"}
-            ]
-        }
-        JSON;
-
-        $avroSchema = AvroSchema::parse($schema);
-
-        $encoder = new AvroEncoder($registry, $recordSerializer);
+        $avroSchema = $this->schemaRegistryClient->getRegistry()->latestVersion('User')->wait();
 
         $producer = KafkaProducerBuilder::create()
             ->withAdditionalConfig(
@@ -74,7 +45,7 @@ class UserProducerCommand extends Command
                     'auto.commit.interval.ms' => 500
                 ]
             )
-            ->withEncoder($encoder)
+            ->withEncoder($this->schemaRegistryClient->getEncoder())
             ->withAdditionalBroker('kafka:9092')
             ->build();
 
@@ -85,13 +56,13 @@ class UserProducerCommand extends Command
 
         foreach ($records as $record) {
             try {
-                $avroData = $recordSerializer->encodeRecord('User', $avroSchema, [
+                $avroData = $this->schemaRegistryClient->getRecordSerializer()->encodeRecord(self::SCHEMA_NAME, $avroSchema, [
                     'name' => $record['Name'],
                     'surname' => $record['Surname'],
                     'email' => $record['Email']
                 ]);
 
-                $message = KafkaProducerMessage::create('users', RD_KAFKA_PARTITION_UA)
+                $message = KafkaProducerMessage::create(self::TOPIC_NAME, RD_KAFKA_PARTITION_UA)
                     ->withBody($avroData);
 
                 $producer->produce($message);
