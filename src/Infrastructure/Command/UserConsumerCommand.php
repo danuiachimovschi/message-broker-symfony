@@ -6,7 +6,6 @@ namespace App\Infrastructure\Command;
 
 use App\Domain\user\Entity\User;
 use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
-use AvroSchema;
 use Doctrine\ORM\EntityManagerInterface;
 use Jobcloud\Kafka\Consumer\KafkaConsumerBuilder;
 use Jobcloud\Kafka\Exception\KafkaConsumerConsumeException;
@@ -25,6 +24,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserConsumerCommand extends Command
 {
+    const TOPIC_NAME = 'users';
+
     public function __construct(
         private EntityManagerInterface $entityManager,
         protected readonly SchemaRegistryClientInterface $schemaRegistryClient,
@@ -51,7 +52,7 @@ class UserConsumerCommand extends Command
             ->withDecoder($this->schemaRegistryClient->getDecoder())
             ->withAdditionalBroker('kafka:9092')
             ->withConsumerGroup('testGroup')
-            ->withAdditionalSubscription('users')
+            ->withAdditionalSubscription(self::TOPIC_NAME)
             ->build();
 
         $consumer->subscribe();
@@ -59,7 +60,6 @@ class UserConsumerCommand extends Command
         while (true) {
             try {
                 $message = $consumer->consume();
-
                 $userData = $this->schemaRegistryClient->getRecordSerializer()->decodeMessage($message->getBody());
 
                 $io->success('Message received: '. $userData['name']);
@@ -71,6 +71,7 @@ class UserConsumerCommand extends Command
 
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
+
                 $consumer->commit($message);
             } catch (KafkaConsumerTimeoutException|KafkaConsumerEndOfPartitionException) {
             } catch (KafkaConsumerConsumeException) {

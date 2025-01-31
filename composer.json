@@ -20,6 +20,7 @@
         "jobcloud/avro-validator": "^2.1",
         "jobcloud/php-kafka-lib": "^2.0",
         "league/csv": "^9.21.0",
+        "php-amqplib/php-amqplib": "^2.0",
         "predis/predis": "^2.3",
         "promphp/prometheus_client_php": "^2.13",
         "smi2/phpclickhouse": "^1.6",

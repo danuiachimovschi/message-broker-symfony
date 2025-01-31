@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\Command;
 
 use App\Infrastructure\Queue\Messenger\Message\OrderPaidMessage;
-use Swoole\Thread\Pool;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,7 +18,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 )]
 class BusCommand extends Command
 {
-    private MessageBusInterface $messageBus;
+    private readonly MessageBusInterface $messageBus;
 
     public function __construct(MessageBusInterface $messageBus)
     {
@@ -34,7 +33,7 @@ class BusCommand extends Command
 
         $this->messageBus->dispatch(new OrderPaidMessage(rand(1, 100)));
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $io->success('Message dispatched');
 
         return Command::SUCCESS;
     }
