@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\Command;
 
 use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
-use AvroSchema;
 use Exception;
 use Jobcloud\Kafka\Message\KafkaProducerMessage;
 use Jobcloud\Kafka\Producer\KafkaProducerBuilder;
@@ -22,6 +21,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserProducerCommand extends Command
 {
+    const SCHEMA_NAME = 'User';
+
+    const TOPIC_NAME = 'users';
+
     public function __construct(
         protected readonly SchemaRegistryClientInterface $schemaRegistryClient,
         string $name = null
@@ -53,13 +56,13 @@ class UserProducerCommand extends Command
 
         foreach ($records as $record) {
             try {
-                $avroData = $this->schemaRegistryClient->getRecordSerializer()->encodeRecord('User', $avroSchema, [
+                $avroData = $this->schemaRegistryClient->getRecordSerializer()->encodeRecord(self::SCHEMA_NAME, $avroSchema, [
                     'name' => $record['Name'],
                     'surname' => $record['Surname'],
                     'email' => $record['Email']
                 ]);
 
-                $message = KafkaProducerMessage::create('users', RD_KAFKA_PARTITION_UA)
+                $message = KafkaProducerMessage::create(self::TOPIC_NAME, RD_KAFKA_PARTITION_UA)
                     ->withBody($avroData);
 
                 $producer->produce($message);
