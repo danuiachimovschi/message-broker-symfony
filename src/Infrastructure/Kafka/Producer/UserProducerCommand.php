@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Command;
+namespace App\Infrastructure\Kafka\Producer;
 
 use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
 use Exception;
@@ -49,7 +49,7 @@ class UserProducerCommand extends Command
             ->withAdditionalBroker('kafka:9092')
             ->build();
 
-        $csv = Reader::createFromPath(__DIR__ . '/../../../fixtures/users.csv', 'r');
+        $csv = Reader::createFromPath(__DIR__ . '/../../../../fixtures/users.csv', 'r');
         $csv->setHeaderOffset(0);
 
         $records = $csv->getRecords();
