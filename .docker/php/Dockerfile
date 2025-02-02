@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     librabbitmq-dev \
     librdkafka-dev \
     redis \
-    && docker-php-ext-install pdo pdo_pgsql zip mbstring \
+    && docker-php-ext-install pdo pdo_pgsql zip mbstring pcntl \
     && pecl install amqp \
     && docker-php-ext-enable amqp \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -38,7 +38,6 @@ RUN apt-get update && apt-get install -y \
     && pecl install swoole-5.0.3 \
     && docker-php-ext-enable swoole \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
