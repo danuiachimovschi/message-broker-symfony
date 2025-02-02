@@ -2,10 +2,8 @@ FROM php:8.2-fpm
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Set working directory
 WORKDIR /var/symfony-rabbit
 
-# Copy project files
 COPY ../.. /var/symfony-rabbit
 
 # Install system dependencies
