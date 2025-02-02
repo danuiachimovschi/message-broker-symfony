@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Command;
+namespace App\Infrastructure\Kafka\Consumer;
 
 use App\Domain\user\Entity\User;
 use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;

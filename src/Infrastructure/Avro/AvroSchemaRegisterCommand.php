@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\Command;
+namespace App\Infrastructure\Avro;
 
 use App\Infrastructure\Avro\Interfaces\SchemaRegistryClientInterface;
 use AvroSchema;
