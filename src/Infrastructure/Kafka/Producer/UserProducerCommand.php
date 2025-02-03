@@ -21,9 +21,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserProducerCommand extends Command
 {
-    const SCHEMA_NAME = 'User';
+    private const SCHEMA_NAME = 'User';
 
-    const TOPIC_NAME = 'users';
+    private const TOPIC_NAME = 'users';
 
     public function __construct(
         protected readonly SchemaRegistryClientInterface $schemaRegistryClient,

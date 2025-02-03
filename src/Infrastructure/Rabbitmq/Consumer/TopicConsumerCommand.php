@@ -9,20 +9,23 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'rabbitmq/consumer-direct',
-    description: 'Rabbitmq consumer direct command',
+    name: 'rabbitmq/consumer-topic',
+    description: 'Rabbitmq second consumer topic command',
 )]
-class DirectConsumerCommand extends Command
+class TopicConsumerCommand extends Command
 {
     protected function execute(InputInterface $input, OutputInterface $output): never
     {
-        $io = new SymfonyStyle($input, $output);
-
         $connection = new AMQPStreamConnection('rabbitmq', 5672, 'guest', 'guest');
         $channel = $connection->channel();
+
+        $channel->exchange_declare('events_topic', 'topic', false, true, false);
+
+        [$queue_name, ,] = $channel->queue_declare("events.client4", false, true, true, false);
+
+        $channel->queue_bind($queue_name, 'events_topic', 'events.*');
 
         $callback = function ($msg) {
             if ($msg->body) {
@@ -30,7 +33,7 @@ class DirectConsumerCommand extends Command
             }
         };
 
-        $channel->basic_consume('daniel', '', false, true, false, false, $callback);
+        $channel->basic_consume('events.client4', '', false, true, false, false, $callback);
 
         while (true) {
             $channel->wait();
