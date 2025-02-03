@@ -2,10 +2,8 @@ FROM php:8.2-fpm
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Set working directory
 WORKDIR /var/symfony-rabbit
 
-# Copy project files
 COPY ../.. /var/symfony-rabbit
 
 # Install system dependencies
@@ -18,23 +16,15 @@ RUN apt-get update && apt-get install -y \
     librabbitmq-dev \
     librdkafka-dev \
     redis \
-    && docker-php-ext-install pdo pdo_pgsql zip mbstring pcntl \
-    && pecl install amqp \
-    && docker-php-ext-enable amqp \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install ext-rdkafka PHP
-RUN pecl install rdkafka \
-    && docker-php-ext-enable rdkafka
-
-# Install Redis Server and PHP Redis extension
-RUN pecl install redis \
-    && docker-php-ext-enable redis
-
-# Install Swoole dependencies
-RUN apt-get update && apt-get install -y \
     libssl-dev \
     libcurl4-openssl-dev \
+    && docker-php-ext-install pdo pdo_pgsql zip mbstring pcntl bcmath sockets \
+    && pecl install amqp \
+    && docker-php-ext-enable amqp \
+    && pecl install rdkafka \
+    && docker-php-ext-enable rdkafka \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && pecl install swoole-5.0.3 \
     && docker-php-ext-enable swoole \
     && apt-get clean && rm -rf /var/lib/apt/lists/*

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\Queue\Messenger\Handlers;
 
 use App\Infrastructure\Queue\Messenger\Message\OrderPaidMessage;

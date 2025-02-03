@@ -24,7 +24,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UserConsumerCommand extends Command
 {
-    const TOPIC_NAME = 'users';
+    private const TOPIC_NAME = 'users';
 
     public function __construct(
         private EntityManagerInterface $entityManager,
