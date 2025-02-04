@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Rabbitmq\Producer;
 
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use App\Infrastructure\Rabbitmq\RabbitmqConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,7 +18,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class DirectProducerCommand extends Command
 {
+    private const QUEUE_NAME = 'q.events-direct';
+
+    private const EXCHANGE_NAME = 'e.direct';
+
     public function __construct(
+        protected readonly RabbitmqConnection $rabbitmqConnection,
         string $name = null
     ) {
         parent::__construct($name);
@@ -26,17 +31,14 @@ class DirectProducerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $connection = new AMQPStreamConnection('rabbitmq', 5672, 'guest', 'guest');
+        $connection = $this->rabbitmqConnection->getConnection();
         $channel = $connection->channel();
-
-        $channel->queue_declare('daniel', false, false, false, false);
 
         $msg = new AMQPMessage(json_encode(['Hello World!']));
 
-        $channel->basic_publish($msg, '', 'daniel');
+        $channel->basic_publish($msg, self::EXCHANGE_NAME, '');
 
         $channel->close();
-        $connection->close();
 
         $io = new SymfonyStyle($input, $output);
 

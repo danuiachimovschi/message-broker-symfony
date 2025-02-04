@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Rabbitmq\Producer;
 
+use App\Infrastructure\Rabbitmq\RabbitmqConnection;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -18,22 +19,30 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class TopicProducerCommand  extends Command
 {
+    private const EXCHANGE_NAME = 'e.topic';
+
+    public function __construct(
+        protected readonly RabbitmqConnection $rabbitmqConnection,
+        string $name = null
+    ) {
+        parent::__construct($name);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $connection = new AMQPStreamConnection('rabbitmq', 5672, 'guest', 'guest');
+        $connection = $this->rabbitmqConnection->getConnection();
         $channel = $connection->channel();
-        $channel->exchange_declare('events_topic', 'topic', false, true, false);
+        $channel->exchange_declare(self::EXCHANGE_NAME, 'topic', false, true, false);
 
         foreach (range(1, 1000) as $i) {
             $msg = new AMQPMessage(json_encode(['Hello World! ' . $i]));
-            $channel->basic_publish($msg, 'events_topic', "events.$i");
+            $channel->basic_publish($msg, self::EXCHANGE_NAME, "events.$i");
             $io->info(sprintf(' [x] Sent %s', $i));
         }
 
         $channel->close();
-        $connection->close();
 
         $io->info('Rabbitmq producer direct command');
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Rabbitmq\Consumer;
 
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use App\Infrastructure\Rabbitmq\RabbitmqConnection;
 use PhpAmqpLib\Wire\AMQPTable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -17,14 +17,25 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class HeaderConsumerCommand extends Command
 {
+    private const EXCHANGE_NAME = 'e.header';
+
+    private const QUEUE_NAME = 'q.events-header';
+
+    public function __construct(
+        protected readonly RabbitmqConnection $rabbitmqConnection,
+        ?string $name = null)
+    {
+        parent::__construct($name);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): never
     {
-        $connection = new AMQPStreamConnection('rabbitmq', 5672, 'guest', 'guest');
+        $connection = $this->rabbitmqConnection->getConnection();
         $channel = $connection->channel();
 
-        $channel->exchange_declare('events_header', 'headers', false, true, false);
+        $channel->exchange_declare(self::EXCHANGE_NAME, 'headers', false, true, false, false, false, arguments: new AMQPTable(['x-max-priority' => 10]));
 
-        [$queue_name, ,] = $channel->queue_declare("events.client5", false, true, true, false);
+        [$queue_name, ,] = $channel->queue_declare(self::QUEUE_NAME, false, true, true, false);
 
         $headers = new AMQPTable([
             'x-match' => 'all',
@@ -32,15 +43,13 @@ class HeaderConsumerCommand extends Command
             'type' => 'log'
         ]);
 
-        $channel->queue_bind($queue_name, 'events_header', '', $headers);
+        $channel->queue_bind($queue_name, self::EXCHANGE_NAME, '', $headers);
 
-        $callback = function ($msg) {
-            if ($msg->body) {
-                echo ' [x] Received ', $msg->body, "\n";
-            }
+        $callback = static function ($msg) {
+            echo ' [x] Received ', $msg->body, "\n";
         };
 
-        $channel->basic_consume('events.client5', '', false, true, false, false, $callback);
+        $channel->basic_consume(self::QUEUE_NAME, '', false, true, false, false, $callback);
 
         while (true) {
             $channel->wait();
