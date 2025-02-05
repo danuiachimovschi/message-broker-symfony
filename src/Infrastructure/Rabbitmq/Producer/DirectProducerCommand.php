@@ -18,8 +18,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class DirectProducerCommand extends Command
 {
-    private const QUEUE_NAME = 'q.events-direct';
-
     private const EXCHANGE_NAME = 'e.direct';
 
     public function __construct(

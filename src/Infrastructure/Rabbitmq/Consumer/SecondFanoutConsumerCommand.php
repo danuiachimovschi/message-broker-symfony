@@ -44,6 +44,7 @@ class SecondFanoutConsumerCommand extends Command
 
         $channel->basic_consume(self::QUEUE_NAME, '', false, true, false, false, $callback);
 
+        /** @phpstan-ignore while.alwaysTrue */
         while (true) {
             $channel->wait();
         }

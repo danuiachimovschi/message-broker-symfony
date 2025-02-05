@@ -44,6 +44,7 @@ class FanoutConsumerCommand extends Command
 
         $channel->basic_consume($queue_name, '', false, true, false, false, $callback);
 
+        /** @phpstan-ignore while.alwaysTrue */
         while (true) {
             $channel->wait();
         }

@@ -44,6 +44,7 @@ class TopicConsumerCommand extends Command
 
         $channel->basic_consume('events.client4', '', false, true, false, false, $callback);
 
+        /** @phpstan-ignore while.alwaysTrue */
         while (true) {
             $channel->wait();
         }
