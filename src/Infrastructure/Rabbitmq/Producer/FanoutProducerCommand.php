@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Rabbitmq\Producer;
 
-use App\Infrastructure\Rabbitmq\RabbitmqConnection;
+use App\Infrastructure\Rabbitmq\RabbitmqConnectionInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +21,7 @@ class FanoutProducerCommand extends Command
     private const EXCHANGE_NAME = 'e.fanout';
 
     public function __construct(
-        protected readonly RabbitmqConnection $rabbitmqConnection,
+        protected readonly RabbitmqConnectionInterface $rabbitmqConnection,
         string $name = null
     ) {
         parent::__construct($name);
