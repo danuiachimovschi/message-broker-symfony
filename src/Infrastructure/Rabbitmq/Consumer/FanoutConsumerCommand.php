@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Rabbitmq\Consumer;
 
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use App\Infrastructure\Rabbitmq\RabbitmqConnectionInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,25 +16,35 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class FanoutConsumerCommand extends Command
 {
+    private const EXCHANGE_NAME = 'e.fanout';
+
+    private const QUEUE_NAME = 'q.events-fanout.1';
+
+    public function __construct(
+        protected readonly RabbitmqConnectionInterface $rabbitmqConnection,
+        ?string $name = null)
+    {
+        parent::__construct($name);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): never
     {
-        $connection = new AMQPStreamConnection('rabbitmq', 5672, 'guest', 'guest');
+        $connection = $this->rabbitmqConnection->getConnection();
         $channel = $connection->channel();
 
-        $channel->exchange_declare('events_fanout', 'fanout', false, true, false);
+        $channel->exchange_declare(self::EXCHANGE_NAME, 'fanout', false, true, false);
 
-        [$queue_name, ,] = $channel->queue_declare("events.client1", false, true, true, false);
+        [$queue_name, ,] = $channel->queue_declare(self::QUEUE_NAME, false, true, true, false);
 
-        $channel->queue_bind($queue_name, 'events_fanout');
+        $channel->queue_bind($queue_name, self::EXCHANGE_NAME);
 
-        $callback = function ($msg) {
-            if ($msg->body) {
-                echo ' [x] Received ', $msg->body, "\n";
-            }
+        $callback = static function ($msg) {
+            echo ' [x] Received ', $msg->body, "\n";
         };
 
         $channel->basic_consume($queue_name, '', false, true, false, false, $callback);
 
+        /** @phpstan-ignore while.alwaysTrue */
         while (true) {
             $channel->wait();
         }
