@@ -35,7 +35,13 @@ class HeaderProducerCommand extends Command
         $connection = $this->rabbitmqConnection->getConnection();
         $channel = $connection->channel();
 
-        $channel->exchange_declare(self::EXCHANGE_NAME, 'headers', false, true, false, false, false, arguments: new AMQPTable(['x-max-priority' => 10]));
+        $channel->exchange_declare(
+            exchange: self::EXCHANGE_NAME,
+            type: 'headers',
+            durable: true,
+            auto_delete: false,
+            arguments: new AMQPTable(['x-max-priority' => 10])
+        );
 
         foreach (range(1, 1000) as $i) {
             $msg = new AMQPMessage(json_encode(['Hello World! ' . $i]));
