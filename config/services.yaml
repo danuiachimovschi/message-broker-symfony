@@ -24,6 +24,14 @@ services:
         shared: true
 
     App\Infrastructure\Rabbitmq\RabbitmqConnectionInterface: '@App\Infrastructure\Rabbitmq\RabbitmqConnection'
+
     App\Infrastructure\Rabbitmq\RabbitmqConnection:
         public: true
+        shared: true
+        arguments:
+            - '@rabbitmq.connection'
+
+    rabbitmq.connection:
+        class: PhpAmqpLib\Connection\AMQPStreamConnection
+        factory: [ 'App\Infrastructure\Rabbitmq\RabbitmqConnectionFactory', 'createConnection' ]
         shared: true

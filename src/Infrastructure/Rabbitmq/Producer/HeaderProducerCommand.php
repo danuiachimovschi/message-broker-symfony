@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Rabbitmq\Producer;
 
 use App\Infrastructure\Rabbitmq\RabbitmqConnection;
+use App\Infrastructure\Rabbitmq\RabbitmqConnectionInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -22,7 +23,7 @@ class HeaderProducerCommand extends Command
     private const EXCHANGE_NAME = 'e.header';
 
     public function __construct(
-        protected readonly RabbitmqConnection $rabbitmqConnection,
+        protected readonly RabbitmqConnectionInterface $rabbitmqConnection,
         string $name = null
     ) {
         parent::__construct($name);
