@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\Rabbitmq\Producer;
 
 use App\Infrastructure\Rabbitmq\RabbitmqConnection;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

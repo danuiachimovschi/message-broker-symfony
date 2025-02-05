@@ -33,7 +33,13 @@ class HeaderConsumerCommand extends Command
         $connection = $this->rabbitmqConnection->getConnection();
         $channel = $connection->channel();
 
-        $channel->exchange_declare(self::EXCHANGE_NAME, 'headers', false, true, false, false, false, arguments: new AMQPTable(['x-max-priority' => 10]));
+        $channel->exchange_declare(
+            exchange: self::EXCHANGE_NAME,
+            type: 'headers',
+            durable: true,
+            auto_delete: false,
+            arguments: new AMQPTable(['x-max-priority' => 10])
+        );
 
         [$queue_name, ,] = $channel->queue_declare(self::QUEUE_NAME, false, true, true, false);
 
@@ -51,6 +57,7 @@ class HeaderConsumerCommand extends Command
 
         $channel->basic_consume(self::QUEUE_NAME, '', false, true, false, false, $callback);
 
+        /** @phpstan-ignore while.alwaysTrue */
         while (true) {
             $channel->wait();
         }
