@@ -49,14 +49,20 @@ class UserProducerCommand extends Command
         $csv->setHeaderOffset(0);
         $counter = 0;
 
-        foreach ($csv as $record) {
-            $queueIndex = $counter % 3;
-            $msg = new AMQPMessage(json_encode($record));
+        $channel->tx_select();
 
-            $channel->basic_publish($msg, self::EXCHANGE_NAME, self::QUEUE_USERS[$queueIndex]);
-            $io->info(sprintf(' [x] Sent %s', $record['Name']));
+        try {
+            foreach ($csv as $record) {
+                $queueIndex = $counter % 3;
+                $msg = new AMQPMessage(json_encode($record));
 
-            $counter++;
+                $channel->basic_publish($msg, self::EXCHANGE_NAME, self::QUEUE_USERS[$queueIndex]);
+                $io->info(sprintf(' [x] Sent %s', $record['Name']));
+                $counter++;
+            }
+            $channel->tx_commit();
+        } catch (\Exception) {
+            $channel->tx_rollback();
         }
 
         $channel->close();
