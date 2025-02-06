@@ -27,16 +27,11 @@ class UserConsumerCommand extends Command
     private const TOPIC_NAME = 'users';
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
         protected readonly SchemaRegistryClientInterface $schemaRegistryClient,
+        private EntityManagerInterface $entityManager,
         string $name = null
     ) {
         parent::__construct($name);
-    }
-
-    protected function configure(): void
-    {
-        $this->addArgument('partition_id', InputArgument::REQUIRED, 'Partition ID');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
