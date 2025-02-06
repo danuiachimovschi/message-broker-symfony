@@ -11,6 +11,9 @@ services:
       - "8082:80"
     depends_on:
       - app
+    networks:
+      - symfony-network
+
   app:
     build:
       context: .
@@ -26,12 +29,16 @@ services:
       - DATABASE_URL=postgresql://user:password@db:5432/app_db
     ports:
       - "8000:80"
+    networks:
+      - symfony-network
 
   redis:
     image: redis:latest
     container_name: redis-server
     ports:
       - "6379:6379"
+    networks:
+      - symfony-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -42,6 +49,16 @@ services:
     ports:
       - "5672:5672"  # RabbitMQ
       - "15672:15672"  # Management UI
+    networks:
+      - symfony-network
+
+  perf_test:
+    image: pivotalrabbitmq/perf-test
+    depends_on:
+      - rabbitmq
+    restart: "no"
+    networks:
+      - symfony-network
 
   zookeeper:
     image: zookeeper:latest
@@ -51,6 +68,8 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
     ports:
       - "2181:2181"
+    networks:
+      - symfony-network
 
   zoonavigator:
     image: elkozmon/zoonavigator:1.0.0
@@ -61,6 +80,8 @@ services:
       - "9000:9000"
     depends_on:
       - zookeeper
+    networks:
+      - symfony-network
 
   kafka:
     image: bitnami/kafka:latest
@@ -75,6 +96,8 @@ services:
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
     ports:
       - "9092:9092"
+    networks:
+      - symfony-network
 
   schema-registry:
     image: confluentinc/cp-schema-registry:latest
@@ -87,6 +110,8 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    networks:
+      - symfony-network
 
   kafka-exporter:
     image: danielqsj/kafka-exporter:latest
@@ -99,6 +124,8 @@ services:
       KAFKA_SERVER: kafka:9092
     command:
       - "--kafka.server=kafka:9092"
+    networks:
+      - symfony-network
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -110,6 +137,8 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
     ports:
       - "8080:8080"
+    networks:
+      - symfony-network
 
   db:
     image: postgres:15
@@ -122,6 +151,8 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - symfony-network
 
   prometheus:
     image: prom/prometheus:latest
@@ -130,6 +161,8 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    networks:
+      - symfony-network
 
   clickhouse:
     image: clickhouse/clickhouse-server:latest
@@ -140,6 +173,8 @@ services:
       - "9001:9001"
     volumes:
       - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - symfony-network
 
   grafana:
     image: grafana/grafana:latest
@@ -151,13 +186,13 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - symfony-network
 
-###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
       POSTGRES_USER: ${POSTGRES_USER:-app}
     healthcheck:
@@ -167,11 +202,15 @@ services:
       start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
+    networks:
+      - symfony-network
 
 volumes:
   clickhouse-data:
   db_data:
   grafana-data:
   database_data:
+
+networks:
+  symfony-network:
+    driver: bridge
