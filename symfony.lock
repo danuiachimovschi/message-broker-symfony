@@ -47,6 +47,9 @@
             ".php-cs-fixer.dist.php"
         ]
     },
+    "mavlitov98/clickhouse-migrations": {
+        "version": "v1.0.0"
+    },
     "php-cs-fixer/shim": {
         "version": "3.9",
         "recipe": {
