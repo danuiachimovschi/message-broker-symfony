@@ -91,6 +91,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.0",
         "friendsofphp/php-cs-fixer": "^3.68.5",
         "kwn/php-rdkafka-stubs": "^2.2.1",
         "php-cs-fixer/shim": "^3.9.3",

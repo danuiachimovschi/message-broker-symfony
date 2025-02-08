@@ -1,11 +1,20 @@
 doctrine:
     dbal:
-        url: '%env(resolve:DATABASE_URL)%'
-        # IMPORTANT: You MUST configure your server version,
-        # either here or in the DATABASE_URL env var (see .env file)
-        server_version: '16'
-        profiling_collect_backtrace: '%kernel.debug%'
-        use_savepoints: true
+        connections:
+            postgres:
+                url: '%env(resolve:POSTGRES_DATABASE_URL)%'
+                charset: UTF8
+                default_table_options:
+                    charset: UTF8
+                    collate: UTF8_unicode_ci
+            clickhouse:
+                host:     '%env(CLICKHOUSE_HOST)%'
+                port:     '%env(CLICKHOUSE_PORT)%'
+                user:     '%env(CLICKHOUSE_USERNAME)%'
+                password: '%env(CLICKHOUSE_PASSWORD)%'
+                dbname:   '%env(CLICKHOUSE_DATABASE)%'
+                driver_class: FOD\DBALClickHouse\Driver
+                wrapper_class: FOD\DBALClickHouse\Connection
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
