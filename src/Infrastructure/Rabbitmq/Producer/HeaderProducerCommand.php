@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Rabbitmq\Producer;
 
-use App\Infrastructure\Rabbitmq\RabbitmqConnection;
 use App\Infrastructure\Rabbitmq\RabbitmqConnectionInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;

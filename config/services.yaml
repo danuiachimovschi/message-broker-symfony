@@ -35,3 +35,5 @@ services:
         class: PhpAmqpLib\Connection\AMQPStreamConnection
         factory: [ 'App\Infrastructure\Rabbitmq\RabbitmqConnectionFactory', 'createConnection' ]
         shared: true
+
+    App\Infrastructure\Elastic\Core\ElasticSearchConnectionInterface: '@App\Infrastructure\Elastic\Core\ElasticSearchConnection'
