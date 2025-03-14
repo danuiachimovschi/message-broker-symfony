@@ -1,0 +1,4 @@
+parameters:
+    elastic_search.host: '%env(ELASTIC_HOST)%'
+    elastic_search.user: '%env(ELASTIC_USER)%'
+    elastic_search.password: '%env(ELASTIC_PASSWORD)%'

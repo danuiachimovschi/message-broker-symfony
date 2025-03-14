@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Elastic;
 
-use Elastic\Elasticsearch\ClientBuilder;
+use App\Infrastructure\Elastic\Core\ElasticSearchConnectionInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,16 +17,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class ElasticSearchConnectCommand extends Command
 {
+    public function __construct(
+        protected ElasticSearchConnectionInterface $elasticSearchConnection,
+        ?string $name = null,
+    ) {
+        parent::__construct($name);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-
-        $client = ClientBuilder::create()
-            ->setHosts(['https://es01:9200'])
-            ->setSSLVerification(false)
-            ->setBasicAuthentication('elastic', 'changeme')
-            ->build();
 
         // Define index settings and mappings
         $params = [
@@ -52,7 +52,7 @@ class ElasticSearchConnectCommand extends Command
             ]
         ];
 
-        $client->indices()->create($params);
+        $this->elasticSearchConnection->getClient()->indices()->create($params);
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
