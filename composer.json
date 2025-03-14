@@ -13,6 +13,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.4.1",
         "doctrine/migrations": ">=3.8.2",
         "doctrine/orm": "^3.3.1",
+        "elasticsearch/elasticsearch": "^8.17",
         "enqueue/rdkafka": "^0.10.20",
         "flix-tech/avro-serde-php": "^2.2",
         "flix-tech/confluent-schema-registry-api": "^8.1",
