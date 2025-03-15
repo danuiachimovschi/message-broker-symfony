@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Infrastructure\Elastic;
 
 use App\Infrastructure\Elastic\Core\ElasticSearchConnectionInterface;
-use Elastic\Elasticsearch\ClientBuilder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'elastic-search:search',
@@ -31,11 +29,8 @@ class ElasticSearchSearchCommand extends Command
             'index' => 'my_custom_index',
             'body'  => [
                 'query' => [
-                    'match' => [
-                        'title' => [
-                            'query' => 'Sample Title 1',
-                            'operator' => 'and'
-                        ]
+                    'wildcard' => [
+                        'title' => 't*'
                     ]
                 ]
             ]
@@ -45,7 +40,6 @@ class ElasticSearchSearchCommand extends Command
 
         $body = $response->asArray();
 
-        var_dump($body);
 
         return Command::SUCCESS;
     }
