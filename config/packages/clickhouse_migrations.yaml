@@ -1,0 +1,9 @@
+clickhouse_migrations:
+  connection:
+    host: '%env(CLICKHOUSE_HOST)%'
+    port: '%env(CLICKHOUSE_PORT)%'
+    username: '%env(CLICKHOUSE_USERNAME)%'
+    password: '%env(CLICKHOUSE_PASSWORD)%'
+  clickhouse_migrations_version_table: 'ch_migrations'
+  clickhouse_migrations_path: '%kernel.project_dir%/src/Migrations/Clickhouse'
+  clickhouse_migrations_namespace: 'App\Migrations\Clickhouse'

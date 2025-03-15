@@ -2,10 +2,8 @@ FROM php:8.2-fpm
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Set working directory
 WORKDIR /var/symfony-rabbit
 
-# Copy project files
 COPY ../.. /var/symfony-rabbit
 
 # Install system dependencies
@@ -16,17 +14,19 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libonig-dev \
     librabbitmq-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip mbstring \
+    librdkafka-dev \
+    redis \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install pdo pdo_pgsql zip mbstring pcntl bcmath sockets \
     && pecl install amqp \
     && docker-php-ext-enable amqp \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-
-# Install  ext-rdkafka php
-RUN apt-get update && apt-get install -y \
-    librdkafka-dev \
     && pecl install rdkafka \
     && docker-php-ext-enable rdkafka \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && pecl install swoole-5.0.3 \
+    && docker-php-ext-enable swoole \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
@@ -44,4 +44,5 @@ RUN chown -R www-data:www-data /var/symfony-rabbit
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
-CMD ["php-fpm"]
+# Start Redis and PHP-FPM
+CMD ["sh", "-c", "redis-server & php-fpm"]
