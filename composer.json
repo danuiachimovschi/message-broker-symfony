@@ -15,6 +15,7 @@
         "doctrine/orm": "^3.3.1",
         "elasticsearch/elasticsearch": "^8.17",
         "enqueue/rdkafka": "^0.10.20",
+        "fakerphp/faker": "^1.24",
         "flix-tech/avro-serde-php": "^2.2",
         "flix-tech/confluent-schema-registry-api": "^8.1",
         "friendsofdoctrine/dbal-clickhouse": "^3.0.1",

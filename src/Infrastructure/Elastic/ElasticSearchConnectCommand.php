@@ -24,11 +24,17 @@ class ElasticSearchConnectCommand extends Command
         parent::__construct($name);
     }
 
+    protected function configure(): void
+    {
+        $this
+            ->setDescription('Create an index in Elasticsearch')
+            ->setHelp('This command allows you to create an index in Elasticsearch');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        // Define index settings and mappings
         $params = [
             'index' => 'my_custom_index',
             'body' => [
@@ -44,7 +50,22 @@ class ElasticSearchConnectCommand extends Command
                         'description' => [
                             'type' => 'text'
                         ],
+                        'author' => [
+                            'type' => 'text'
+                        ],
+                        'email' => [
+                            'type' => 'text'
+                        ],
+                        'phone' => [
+                            'type' => 'text'
+                        ],
+                        'age' => [
+                            'type' => 'integer'
+                        ],
                         'created_at' => [
+                            'type' => 'date'
+                        ],
+                        'updated_at' => [
                             'type' => 'date'
                         ]
                     ]
@@ -54,7 +75,7 @@ class ElasticSearchConnectCommand extends Command
 
         $this->elasticSearchConnection->getClient()->indices()->create($params);
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $io->success('Index created');
 
         return Command::SUCCESS;
     }
