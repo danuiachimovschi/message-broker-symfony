@@ -21,6 +21,7 @@
         "friendsofdoctrine/dbal-clickhouse": "^3.0.1",
         "jobcloud/avro-validator": "^2.1",
         "jobcloud/php-kafka-lib": "^2.0",
+        "laudis/neo4j-php-client": "^3.2",
         "league/csv": "^9.21.0",
         "mavlitov98/clickhouse-migrations": "^1.0",
         "php-amqplib/php-amqplib": "^3.7",

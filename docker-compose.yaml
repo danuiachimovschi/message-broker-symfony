@@ -306,7 +306,7 @@ services:
       timeout: 10s
       retries: 120
     networks:
-        - symfony-network
+      - symfony-network
   kibana:
     depends_on:
       es01:
@@ -339,18 +339,41 @@ services:
       timeout: 10s
       retries: 120
     networks:
+      - symfony-network
+
+  neo4j:
+    image: neo4j:5.16.0
+    container_name: neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/strongpassword123
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_initial__size: 512M
+      NEO4J_dbms_memory_heap_max__size: 1G
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_conf:/var/lib/neo4j/conf
+    networks:
         - symfony-network
 volumes:
   clickhouse-data:
   db_data:
   grafana-data:
   database_data:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_conf:
   certs:
     driver: local
   esdata01:
     driver: local
   kibanadata:
     driver: local
+
 
 networks:
   symfony-network:
