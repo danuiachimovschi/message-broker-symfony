@@ -37,3 +37,4 @@ services:
         shared: true
 
     App\Infrastructure\Elastic\Core\ElasticSearchConnectionInterface: '@App\Infrastructure\Elastic\Core\ElasticSearchConnection'
+    App\Infrastructure\Neo4j\Core\Neo4jConnectionInterface: '@App\Infrastructure\Neo4j\Core\Neo4jConnection'
